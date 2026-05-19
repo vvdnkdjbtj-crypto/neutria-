@@ -227,7 +227,7 @@ function ScannerPage({ inv, setInv, plan, msg }) {
         const r = await fetch('/api/scan', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({image_b64:b64})
+          body: JSON.stringify({imageBase64:b64})
         });
         const data = await r.json();
         res.push({
