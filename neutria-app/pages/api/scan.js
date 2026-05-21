@@ -1,7 +1,4 @@
 // pages/api/scan.js
-// Proxies scan requests from neutria.co.uk to the HF Phase 28 scanner Space,
-// and reshapes the response so the frontend (index.js) can render it directly.
-
 export const config = {
   api: {
     bodyParser: {
@@ -70,6 +67,7 @@ export default async function handler(req, res) {
         error: 'No JSON in HF response',
         title: 'Unknown Item',
         price: 0,
+        suggested_price: 0,
         category: 'Misc',
         condition: 'Good',
       });
@@ -89,6 +87,7 @@ export default async function handler(req, res) {
         error: 'JSON parse failed',
         title: 'Unknown Item',
         price: 0,
+        suggested_price: 0,
         category: 'Misc',
         condition: 'Good',
       });
@@ -110,6 +109,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       title,
       price,
+      suggested_price: price,
       category,
       condition,
       description,
@@ -123,6 +123,7 @@ export default async function handler(req, res) {
       details: err.message,
       title: 'Unknown Item',
       price: 0,
+      suggested_price: 0,
       category: 'Misc',
       condition: 'Good',
     });
