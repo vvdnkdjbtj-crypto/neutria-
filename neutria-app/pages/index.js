@@ -10,10 +10,10 @@ const T = {
 };
 
 const PLANS = [
-  { id:"free",     name:"Free",     price:0,      period:"forever",        commission:12, scans:5,        cta:"Get started free",    features:["5 AI scans/month","10 active listings","12% commission","Basic marketplace"] },
-  { id:"seller",   name:"Seller",   price:12.99,  period:"per month + VAT",commission:8,  scans:100,      cta:"Start Seller",        features:["100 AI scans/month","200 listings","8% commission","Pro image sourcing","eBay & Vinted cross-listing","Priority support"], highlight:true, badge:"Most Popular" },
-  { id:"pro",      name:"Pro",      price:39,     period:"per month + VAT",commission:5,  scans:Infinity, cta:"Start Pro",           features:["Unlimited scans","Unlimited listings","5% commission","Warehouse access","Advanced analytics","API access"], badge:"Best Value" },
-  { id:"business", name:"Business", price:159,    period:"per month + VAT",commission:3,  scans:Infinity, cta:"Contact sales",       features:["Everything in Pro","Dedicated warehouse","White-label pages","B2B liquidation portal","Custom commission","SLA fulfilment"] },
+  { id:"free",     name:"Free",     price:0,      period:"forever",        commission:12, scans:5,        cta:"Get started free", features:["5 AI scans/month","10 active listings","12% commission","Basic marketplace"] },
+  { id:"seller",   name:"Seller",   price:12.99,  period:"per month + VAT",commission:8,  scans:100,      cta:"Start Seller",     features:["100 AI scans/month","200 listings","8% commission","Cross-listing to eBay & Vinted","Priority support"], highlight:true, badge:"Most Popular" },
+  { id:"pro",      name:"Pro",      price:39,     period:"per month + VAT",commission:5,  scans:Infinity, cta:"Start Pro",        features:["Unlimited scans","Unlimited listings","5% commission","Warehouse access","Advanced analytics","API access"], badge:"Best Value" },
+  { id:"business", name:"Business", price:159,    period:"per month + VAT",commission:3,  scans:Infinity, cta:"Contact sales",    features:["Everything in Pro","Dedicated warehouse","White-label pages","B2B liquidation portal","Custom commission","SLA fulfilment"] },
 ];
 
 const DISP = [
@@ -45,12 +45,10 @@ export default function Neutria() {
   const [focus, setFocus] = useState(null);
   const [plan, setPlan] = useState(PLANS[0]);
   const [toast, setToast] = useState(null);
-  const [scanned, setScanned] = useState([]);
   const [checkoutItems, setCheckoutItems] = useState(null);
 
   const msg = (m, t='ok') => { setToast({m,t}); setTimeout(()=>setToast(null), 4000); };
   const go = p => setPage(p);
-
   const addCart = item => { setCart(p=>p.find(c=>c.id===item.id)?p:[...p,item]); msg('Added to cart'); };
   const buyNow = item => { setCheckoutItems([item]); setPage('checkout'); };
 
@@ -58,37 +56,30 @@ export default function Neutria() {
     if (selectedPlan.id === 'free') { setPlan(selectedPlan); msg('Welcome to Neutria!'); go('dashboard'); return; }
     if (selectedPlan.id === 'business') { msg('Our team will contact you shortly'); return; }
     try {
-      const r = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: selectedPlan.id })
-      });
+      const r = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ plan: selectedPlan.id }) });
       const { url } = await r.json();
       if (url) window.location.href = url;
-    } catch(e) { msg('Payment setup failed — please try again', 'err'); }
+    } catch(e) { msg('Payment setup failed', 'err'); }
   };
 
   return (
     <>
       <Head>
-        <title>Neutria — AI-Powered Resale Platform</title>
-        <meta name="description" content="Photograph anything. AI identifies, values, and lists it in seconds."/>
+        <title>Neutria — The reverse of online shopping. AI-powered resale infrastructure.</title>
+        <meta name="description" content="Send us your unwanted items. AI photographs, prices, lists, and sells them — you watch from your inventory dashboard."/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="icon" href="/favicon.ico"/>
       </Head>
 
       <div style={{minHeight:'100vh',background:T.bg,fontFamily:"Inter,sans-serif",color:T.ink}}>
-        {/* NAV */}
-        <header style={{display:'flex',alignItems:'center',height:60,padding:'0 40px',background:T.surf,borderBottom:`1px solid ${T.bdr}`,position:'sticky',top:0,zIndex:100,gap:0}}>
+        <header style={{display:'flex',alignItems:'center',height:60,padding:'0 40px',background:T.surf,borderBottom:`1px solid ${T.bdr}`,position:'sticky',top:0,zIndex:100}}>
           <button onClick={()=>go('home')} style={{display:'flex',alignItems:'center',gap:10,marginRight:48,background:'none',border:'none',cursor:'pointer'}}>
             <div style={{width:32,height:32,background:T.g800,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center'}}><Logo size={18}/></div>
             <span style={{fontSize:18,fontWeight:400,color:T.ink,letterSpacing:'-0.02em',fontFamily:"'Instrument Serif',serif"}}>Neutria</span>
           </button>
           <nav style={{display:'flex',flex:1,gap:0}}>
-            {[['home','Home'],['scanner','Smart Scanner'],['marketplace','Marketplace'],['membership','Membership'],['dashboard','Dashboard']].map(([id,l])=>(
-              <button key={id} onClick={()=>go(id)} style={{padding:'0 14px',height:60,fontSize:13,fontWeight:page===id?600:500,color:page===id?T.g700:T.ink3,borderBottom:page===id?`2px solid ${T.g600}`:'2px solid transparent',border:'none',background:'none',cursor:'pointer'}}>
-                {l}
-              </button>
+            {[['home','Home'],['scanner','Smart Scanner'],['marketplace','Marketplace'],['membership','Membership'],['dashboard','Dashboard'],['partners','For Brands']].map(([id,l])=>(
+              <button key={id} onClick={()=>go(id)} style={{padding:'0 14px',height:60,fontSize:13,fontWeight:page===id?600:500,color:page===id?T.g700:T.ink3,borderBottom:page===id?`2px solid ${T.g600}`:'2px solid transparent',border:'none',background:'none',cursor:'pointer'}}>{l}</button>
             ))}
           </nav>
           <div style={{display:'flex',alignItems:'center',gap:12}}>
@@ -100,21 +91,20 @@ export default function Neutria() {
           </div>
         </header>
 
-        {/* PAGES */}
         <main style={{flex:1,animation:'fadeUp .3s ease'}}>
-          {page==='home'       && <HomePage go={go} addCart={addCart} onItem={i=>{setFocus(i);go('item');}}/>}
-          {page==='scanner'    && <ScannerPage inv={inv} setInv={setInv} plan={plan} msg={msg}/>}
-          {page==='marketplace'&& <MarketplacePage addCart={addCart} onItem={i=>{setFocus(i);go('item');}}/>}
-          {page==='item'       && focus && <ItemPage item={focus} onBack={()=>go('marketplace')} addCart={addCart} buyNow={buyNow}/>}
-          {page==='membership' && <MembershipPage plan={plan} onSelect={handleCheckout}/>}
-          {page==='dashboard'  && <DashboardPage inv={inv} orders={orders} plan={plan} go={go}/>}
-          {page==='cart'       && <CartPage cart={cart} setCart={setCart} go={go} onCheckout={items=>{setCheckoutItems(items);go('checkout');}}/>}
-          {page==='checkout'   && <CheckoutPage items={checkoutItems||cart} onBack={()=>go('cart')} onPlace={(items,addr,card)=>{setOrders(p=>[...items.map(i=>({id:Math.random().toString(36).slice(2),item:i,status:'confirmed',address:addr,card,placedAt:new Date().toLocaleDateString('en-GB')})),...p]);setCart([]);go('orders');msg('Order placed! ✓');}} go={go}/>}
-          {page==='orders'     && <OrdersPage orders={orders} go={go} onOrder={o=>{setFocus(o);go('orderDetail');}}/>}
-          {page==='orderDetail'&& focus && <OrderDetailPage order={focus} onBack={()=>go('orders')}/>}
+          {page==='home'        && <HomePage go={go} msg={msg}/>}
+          {page==='scanner'     && <ScannerPage inv={inv} setInv={setInv} plan={plan} msg={msg}/>}
+          {page==='marketplace' && <MarketplacePage addCart={addCart} onItem={i=>{setFocus(i);go('item');}}/>}
+          {page==='item'        && focus && <ItemPage item={focus} onBack={()=>go('marketplace')} addCart={addCart} buyNow={buyNow}/>}
+          {page==='membership'  && <MembershipPage plan={plan} onSelect={handleCheckout}/>}
+          {page==='dashboard'   && <DashboardPage inv={inv} orders={orders} plan={plan} go={go}/>}
+          {page==='partners'    && <PartnersPage msg={msg}/>}
+          {page==='cart'        && <CartPage cart={cart} setCart={setCart} go={go} onCheckout={items=>{setCheckoutItems(items);go('checkout');}}/>}
+          {page==='checkout'    && <CheckoutPage items={checkoutItems||cart} onBack={()=>go('cart')} onPlace={(items,addr,card)=>{setOrders(p=>[...items.map(i=>({id:Math.random().toString(36).slice(2),item:i,status:'confirmed',address:addr,card,placedAt:new Date().toLocaleDateString('en-GB')})),...p]);setCart([]);go('orders');msg('Order placed! ✓');}} go={go}/>}
+          {page==='orders'      && <OrdersPage orders={orders} go={go} onOrder={o=>{setFocus(o);go('orderDetail');}}/>}
+          {page==='orderDetail' && focus && <OrderDetailPage order={focus} onBack={()=>go('orders')}/>}
         </main>
 
-        {/* TOAST */}
         {toast&&<div style={{position:'fixed',bottom:24,right:24,padding:'11px 18px',borderRadius:8,fontSize:13,fontWeight:500,zIndex:999,border:'1px solid',animation:'fadeUp .3s ease',maxWidth:340,boxShadow:'0 4px 16px rgba(0,0,0,.06)',background:toast.t==='err'?'#fef2f2':'#f0fdf4',color:toast.t==='err'?T.err:T.g700,borderColor:toast.t==='err'?'#fca5a5':T.g200}}>{toast.m}</div>}
       </div>
     </>
@@ -122,81 +112,279 @@ export default function Neutria() {
 }
 
 // ── HOME PAGE ──────────────────────────────────────────────────────────────
-function HomePage({ go, addCart, onItem }) {
+function HomePage({ go, msg }) {
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const joinWaitlist = async () => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg('Please enter a valid email','err'); return; }
+    try { await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); } catch(e) {}
+    setSubmitted(true);
+    msg("You're on the list ✓");
+  };
+
   return (
     <div>
-      <section style={{background:T.surf,borderBottom:`1px solid ${T.bdr}`}}>
-        <div style={{maxWidth:1200,margin:'0 auto',padding:'80px 48px',display:'grid',gridTemplateColumns:'1fr 1fr',gap:72,alignItems:'center'}}>
+      <section style={{background:T.surf,borderBottom:`1px solid ${T.bdr}`,overflow:'hidden'}}>
+        <div style={{maxWidth:1200,margin:'0 auto',padding:'88px 48px',display:'grid',gridTemplateColumns:'1.05fr 1fr',gap:64,alignItems:'center'}}>
           <div>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'5px 14px',background:T.g50,border:`1px solid ${T.g200}`,borderRadius:100,fontSize:12,fontWeight:500,color:T.g700,marginBottom:28}}>
               <span style={{width:6,height:6,borderRadius:'50%',background:T.g500,display:'inline-block'}}/>
-              AI-Powered Resale · Zero Manual Listing
+              The reverse of online shopping
             </div>
-            <h1 style={{fontSize:56,fontWeight:300,letterSpacing:'-0.035em',color:T.ink,lineHeight:1.06,marginBottom:24,fontFamily:"'Instrument Serif',serif"}}>
-              The smarter way<br/>to sell <em style={{fontStyle:'italic',color:T.g700}}>everything</em><br/>you own.
+            <h1 style={{fontSize:60,fontWeight:300,letterSpacing:'-0.038em',color:T.ink,lineHeight:1.02,marginBottom:24,fontFamily:"'Instrument Serif',serif"}}>
+              Everything you<br/>don't want, <em style={{fontStyle:'italic',color:T.g700}}>gone.</em>
             </h1>
-            <p style={{fontSize:16,color:T.ink3,lineHeight:1.75,marginBottom:36,maxWidth:420}}>Photograph your items. AI identifies, values, and lists them in seconds. Sell, donate, recycle, store, or get instant cash.</p>
-            <div style={{display:'flex',gap:12,marginBottom:28,flexWrap:'wrap'}}>
-              <button onClick={()=>go('scanner')} style={{padding:'13px 26px',background:T.g800,color:'#fff',borderRadius:9,fontSize:14,fontWeight:500,border:'none',cursor:'pointer',display:'flex',alignItems:'center',gap:8}}>
-                Start for free
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-              <button onClick={()=>go('membership')} style={{padding:'13px 24px',background:T.g50,color:T.g700,borderRadius:9,fontSize:14,fontWeight:500,border:`1px solid ${T.g200}`,cursor:'pointer'}}>View plans →</button>
+            <p style={{fontSize:17,color:T.ink3,lineHeight:1.65,marginBottom:36,maxWidth:480}}>Amazon brings you stuff. Neutria takes it away — and sells it. Photograph items, send them in, watch them sell from your personal inventory dashboard. No listings. No buyer messages. No post office trips.</p>
+            {!submitted ? (
+              <div style={{display:'flex',gap:8,marginBottom:18,maxWidth:480}}>
+                <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&joinWaitlist()} type="email" placeholder="your@email.com" style={{flex:1,padding:'14px 16px',background:T.bg,border:`1px solid ${T.bdr}`,borderRadius:10,fontSize:14,color:T.ink,fontFamily:'Inter,sans-serif'}}/>
+                <button onClick={joinWaitlist} style={{padding:'14px 22px',background:T.g800,color:'#fff',borderRadius:10,fontSize:14,fontWeight:500,border:'none',cursor:'pointer',whiteSpace:'nowrap'}}>Join the waitlist →</button>
+              </div>
+            ) : (
+              <div style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:T.g50,border:`1px solid ${T.g200}`,borderRadius:10,maxWidth:480,marginBottom:18}}>
+                <span style={{color:T.g600,fontWeight:700}}>✓</span>
+                <span style={{fontSize:14,color:T.g700,fontWeight:500}}>You're on the list. We'll email you when your invite is ready.</span>
+              </div>
+            )}
+            <div style={{display:'flex',gap:24,flexWrap:'wrap'}}>
+              {['Free to join','UK-based','All categories'].map(t=><span key={t} style={{fontSize:12,color:T.ink5,fontWeight:500}}>✓ {t}</span>)}
             </div>
-            <div style={{display:'flex',gap:20}}>{['Free to start','No listing effort','AI does the work'].map(t=><span key={t} style={{fontSize:12,color:T.ink5,fontWeight:500}}>✓ {t}</span>)}</div>
           </div>
-          <div style={{background:T.alt,borderRadius:16,overflow:'hidden',border:`1px solid ${T.bdr}`}}>
+
+          <div style={{background:T.alt,borderRadius:16,overflow:'hidden',border:`1px solid ${T.bdr}`,boxShadow:'0 30px 60px -20px rgba(12,45,30,0.18)'}}>
             <div style={{display:'flex',alignItems:'center',gap:6,padding:'12px 16px',background:T.surf,borderBottom:`1px solid ${T.bdr}`}}>
               {[0,1,2].map(i=><div key={i} style={{width:10,height:10,borderRadius:'50%',background:T.bdr}}/>)}
-              <span style={{marginLeft:8,fontSize:12,fontWeight:600,color:T.ink4}}>Smart Scanner</span>
+              <span style={{marginLeft:8,fontSize:11,fontWeight:600,color:T.ink4,fontFamily:"'JetBrains Mono',monospace"}}>my.neutria.co.uk · inventory</span>
             </div>
-            <div style={{padding:16,display:'flex',flexDirection:'column',gap:10}}>
-              {[{t:'Sony WH-1000XM4',s:'Electronics · Excellent',p:'£145',b:'↗ High demand',e:'🎧'},{t:"Arc'teryx Beta AR Jacket",s:'Clothing · Very Good',p:'£265',b:'◆ Luxury',e:'🧥'},{t:'Herman Miller Aeron',s:'Furniture · Good',p:'£530',b:'↗ High demand',e:'🪑'}].map((it,i)=>(
-                <div key={i} style={{background:T.surf,borderRadius:10,padding:'12px 14px',display:'flex',alignItems:'center',gap:12,border:`1px solid ${T.bdrS}`}}>
-                  <span style={{fontSize:28,width:40,textAlign:'center'}}>{it.e}</span>
-                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600,color:T.ink,marginBottom:2}}>{it.t}</div><div style={{fontSize:11,color:T.ink4}}>{it.s}</div></div>
-                  <div style={{textAlign:'right'}}><div style={{fontSize:16,fontWeight:600,color:T.g700,fontFamily:"'JetBrains Mono',monospace"}}>{it.p}</div><div style={{fontSize:10,color:T.g600,fontWeight:600,marginTop:1}}>{it.b}</div></div>
+            <div style={{padding:'18px 18px 14px',background:T.surf,borderBottom:`1px solid ${T.bdrS}`}}>
+              <div style={{fontSize:11,fontWeight:700,color:T.g600,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8}}>Your Inventory</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+                {[['247','Items'],['£3,420','Sold'],['£8,160','Listed']].map(([v,l])=>(
+                  <div key={l}><div style={{fontSize:20,fontWeight:500,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>{v}</div><div style={{fontSize:10,color:T.ink4,fontWeight:500}}>{l}</div></div>
+                ))}
+              </div>
+            </div>
+            <div style={{padding:14,display:'flex',flexDirection:'column',gap:8}}>
+              {[
+                {t:"Vintage Levi's 501 Jeans",s:'In warehouse · listed',p:'£54',b:'⚡ 12 views',e:'👖',c:T.g600},
+                {t:'Herman Miller Aeron Chair',s:'Sold · awaiting payout',p:'£530',b:'✓ Sold',e:'🪑',c:T.g700},
+                {t:'Sony WH-1000XM4',s:'In warehouse · listed',p:'£145',b:'⚡ 89 views',e:'🎧',c:T.g600},
+                {t:'KitchenAid Stand Mixer',s:'In transit to warehouse',p:'pending',b:'In transit',e:'🍰',c:T.ink4},
+              ].map((it,i)=>(
+                <div key={i} style={{background:T.surf,borderRadius:10,padding:'10px 12px',display:'flex',alignItems:'center',gap:10,border:`1px solid ${T.bdrS}`}}>
+                  <span style={{fontSize:22,width:32,textAlign:'center'}}>{it.e}</span>
+                  <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:T.ink,marginBottom:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{it.t}</div><div style={{fontSize:10,color:T.ink4}}>{it.s}</div></div>
+                  <div style={{textAlign:'right'}}><div style={{fontSize:13,fontWeight:600,color:T.g700,fontFamily:"'JetBrains Mono',monospace"}}>{it.p}</div><div style={{fontSize:9,color:it.c,fontWeight:600,marginTop:1}}>{it.b}</div></div>
                 </div>
               ))}
-              <div style={{background:T.g50,borderRadius:8,padding:'10px 14px',border:`1px solid ${T.g100}`}}>
-                <span style={{fontSize:11,color:T.g700,fontWeight:600}}>✓ Scan complete · 3 items · £940 total value</span>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div style={{background:T.g900,display:'flex',justifyContent:'center'}}>
-        {[['£11M+','Paid to sellers'],['2.4M','Items processed'],['96.4%','AI accuracy'],['28s','Avg. scan time'],['9','Disposition options']].map(([v,l],i)=>(
-          <div key={l} style={{padding:'28px 40px',textAlign:'center',borderRight:i<4?`1px solid ${T.g800}`:'none',flex:1,maxWidth:200}}>
-            <div style={{fontSize:28,fontWeight:300,color:'#fff',fontFamily:"'Instrument Serif',serif",letterSpacing:'-0.02em',marginBottom:4}}>{v}</div>
-            <div style={{fontSize:11,color:T.g300,fontWeight:500,letterSpacing:'0.04em'}}>{l}</div>
-          </div>
-        ))}
-      </div>
-
-      <section style={{background:T.g900,padding:'80px 48px'}}>
+      <section style={{background:T.bg,padding:'88px 48px',borderBottom:`1px solid ${T.bdr}`}}>
         <div style={{maxWidth:1200,margin:'0 auto'}}>
-          <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g300,marginBottom:14,textTransform:'uppercase'}}>WHAT HAPPENS NEXT</div>
-          <h2 style={{fontSize:44,fontWeight:300,letterSpacing:'-0.03em',color:'#fff',marginBottom:48,fontFamily:"'Instrument Serif',serif"}}>Nine ways to move<br/>your items.</h2>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:1,background:T.g800,borderRadius:12,overflow:'hidden'}}>
-            {DISP.map(d=>(
-              <div key={d.id} style={{background:T.g900,padding:'26px 24px',display:'flex',alignItems:'center',gap:14}}>
-                <span style={{fontSize:18,color:T.g300,width:22,textAlign:'center'}}>{d.i}</span>
-                <span style={{fontSize:15,fontWeight:400,color:T.g100}}>{d.l}</span>
+          <div style={{textAlign:'center',marginBottom:56}}>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g600,marginBottom:14,textTransform:'uppercase'}}>HOW IT WORKS</div>
+            <h2 style={{fontSize:46,fontWeight:300,letterSpacing:'-0.03em',color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:16,lineHeight:1.05}}>You scan. We do everything else.</h2>
+            <p style={{fontSize:16,color:T.ink3,maxWidth:580,margin:'0 auto',lineHeight:1.7}}>From the photo on your phone to the payout in your account — Neutria handles every step in between.</p>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16}}>
+            {[
+              {n:'01',t:'Scan your items',d:'Photograph anything with our AI scanner. Identifies brand, model, condition, and market value in seconds.'},
+              {n:'02',t:'Send them in',d:'Print a free prepaid label. Drop the box at any post office. Items arrive at our UK warehouse.'},
+              {n:'03',t:'We list everywhere',d:'Items get listed on Neutria, eBay, Vinted, Depop — automatically. We handle every buyer message and return.'},
+              {n:'04',t:'Watch from your dashboard',d:"See what's listed, what's sold, what's viewed. Get paid monthly. Donate anything unsold."},
+            ].map(s=>(
+              <div key={s.n} style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:14,padding:'28px 24px'}}>
+                <div style={{fontSize:11,fontWeight:700,color:T.g600,letterSpacing:'0.1em',fontFamily:"'JetBrains Mono',monospace",marginBottom:16}}>{s.n}</div>
+                <h3 style={{fontSize:18,fontWeight:500,color:T.ink,marginBottom:10,letterSpacing:'-0.01em'}}>{s.t}</h3>
+                <p style={{fontSize:13,color:T.ink3,lineHeight:1.65}}>{s.d}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{background:T.g900,padding:'96px 48px',textAlign:'center',borderTop:`1px solid ${T.g800}`}}>
-        <h2 style={{fontSize:48,fontWeight:300,color:'#fff',fontFamily:"'Instrument Serif',serif",letterSpacing:'-0.03em',marginBottom:16}}>Ready to start?</h2>
-        <p style={{fontSize:16,color:T.g300,marginBottom:40}}>Join thousands of sellers who turned their clutter into cash.</p>
-        <button onClick={()=>go('scanner')} style={{padding:'14px 32px',background:'#fff',color:T.g900,borderRadius:9,fontSize:15,fontWeight:500,border:'none',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10}}>
-          Scan your first items free
+      <section style={{background:T.surf,padding:'88px 48px',borderBottom:`1px solid ${T.bdr}`}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1.1fr',gap:64,alignItems:'center'}}>
+            <div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g600,marginBottom:14,textTransform:'uppercase'}}>WHY NEUTRIA</div>
+              <h2 style={{fontSize:42,fontWeight:300,letterSpacing:'-0.03em',color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:20,lineHeight:1.1}}>Built for people with stuff — not patience.</h2>
+              <p style={{fontSize:15,color:T.ink3,lineHeight:1.75,marginBottom:24}}>Vinted is for one item. eBay takes a week per listing. Depop is for fashion. Selling a houseful of things on these platforms is a part-time job.</p>
+              <p style={{fontSize:15,color:T.ink3,lineHeight:1.75}}>Neutria is for when you have <em style={{fontStyle:'italic',color:T.g700}}>fifty</em>. A whole loft. A storage unit. A house you're clearing. A wardrobe you've finally had enough of.</p>
+            </div>
+            <div style={{background:T.bg,borderRadius:14,border:`1px solid ${T.bdr}`,overflow:'hidden'}}>
+              <div style={{padding:'18px 22px',background:T.alt,borderBottom:`1px solid ${T.bdr}`}}>
+                <div style={{fontSize:11,fontWeight:700,color:T.ink4,letterSpacing:'0.08em',textTransform:'uppercase'}}>vs other platforms</div>
+              </div>
+              {[
+                ['Time to list 50 items','Vinted: ~8 hours','Neutria: ~15 minutes'],
+                ['Buyer messages handled','You','Us'],
+                ['Storage of unsold items','Your house','Our warehouse'],
+                ['Categories accepted','One per app','All'],
+                ['Items left over','Your problem','Auto-donated'],
+              ].map(([label,old,ours],i)=>(
+                <div key={i} style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',padding:'14px 22px',borderBottom:i<4?`1px solid ${T.bdrS}`:'none',fontSize:13,alignItems:'center'}}>
+                  <div style={{color:T.ink4,fontWeight:500}}>{label}</div>
+                  <div style={{color:T.ink4,textDecoration:'line-through',fontSize:12}}>{old}</div>
+                  <div style={{color:T.g700,fontWeight:600}}>✓ {ours}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{background:T.g900,padding:'88px 48px',color:'#fff'}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <div style={{display:'grid',gridTemplateColumns:'1.1fr 1fr',gap:64,alignItems:'center'}}>
+            <div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g300,marginBottom:14,textTransform:'uppercase'}}>FOR BRANDS & MARKETPLACES</div>
+              <h2 style={{fontSize:42,fontWeight:300,letterSpacing:'-0.03em',color:'#fff',fontFamily:"'Instrument Serif',serif",marginBottom:20,lineHeight:1.1}}>Neutria, embedded in your store.</h2>
+              <p style={{fontSize:15,color:T.g200,lineHeight:1.75,marginBottom:20}}>Every retailer is being asked to offer take-back and resale. Building it from scratch costs millions and takes years.</p>
+              <p style={{fontSize:15,color:T.g200,lineHeight:1.75,marginBottom:30}}>Neutria is the plug-in. Your customers scan items in your branded app. Items flow into our warehouse infrastructure. Resale revenue lands back in your loyalty program.</p>
+              <button onClick={()=>go('partners')} style={{padding:'12px 22px',background:'#fff',color:T.g900,borderRadius:9,fontSize:14,fontWeight:600,border:'none',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                See partner options
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+              {[
+                {t:'White-label scanner',d:'Your brand. Your colours. Our AI underneath.'},
+                {t:'Warehouse access',d:'Items routed to UK fulfilment without your ops team lifting a finger.'},
+                {t:'Customer loyalty',d:'Resale revenue converts to your store credit.'},
+                {t:'ESG reporting',d:'Track diverted-from-landfill metrics. Built-in dashboards.'},
+              ].map(b=>(
+                <div key={b.t} style={{background:T.g800,borderRadius:12,padding:'22px 20px',border:`1px solid ${T.g700}`}}>
+                  <div style={{fontSize:14,fontWeight:600,color:'#fff',marginBottom:8}}>{b.t}</div>
+                  <div style={{fontSize:12,color:T.g300,lineHeight:1.6}}>{b.d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{background:T.bg,padding:'88px 48px',borderTop:`1px solid ${T.bdr}`,borderBottom:`1px solid ${T.bdr}`}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g600,marginBottom:14,textTransform:'uppercase'}}>NINE WAYS OUT</div>
+          <h2 style={{fontSize:42,fontWeight:300,letterSpacing:'-0.03em',color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:36,lineHeight:1.1}}>Every item has a destination.<br/>You decide which.</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+            {DISP.map(d=>(
+              <div key={d.id} style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:10,padding:'22px 24px',display:'flex',alignItems:'center',gap:14}}>
+                <span style={{fontSize:18,color:T.g600,width:22,textAlign:'center'}}>{d.i}</span>
+                <span style={{fontSize:15,fontWeight:500,color:T.ink}}>{d.l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{background:T.g900,padding:'96px 48px',textAlign:'center'}}>
+        <h2 style={{fontSize:50,fontWeight:300,color:'#fff',fontFamily:"'Instrument Serif',serif",letterSpacing:'-0.03em',marginBottom:18,lineHeight:1.05}}>Get the stuff out.</h2>
+        <p style={{fontSize:17,color:T.g300,marginBottom:36,maxWidth:520,margin:'0 auto 36px'}}>Be first in line when Neutria launches. UK only, free to join.</p>
+        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} style={{padding:'15px 34px',background:'#fff',color:T.g900,borderRadius:10,fontSize:15,fontWeight:600,border:'none',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10}}>
+          Join the waitlist
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
+      </section>
+    </div>
+  );
+}
+
+// ── PARTNERS PAGE (B2B) ────────────────────────────────────────────────────
+function PartnersPage({ msg }) {
+  const [form, setForm] = useState({name:'',company:'',email:'',message:''});
+  const [sent, setSent] = useState(false);
+
+  const submit = async () => {
+    if (!form.name || !form.email || !form.company) { msg('Please complete the required fields','err'); return; }
+    try { await fetch('/api/partners',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)}); } catch(e) {}
+    setSent(true);
+    msg("Thanks — we'll be in touch ✓");
+  };
+
+  return (
+    <div style={{background:T.bg}}>
+      <section style={{background:T.g900,padding:'80px 48px',color:'#fff'}}>
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g300,marginBottom:14,textTransform:'uppercase'}}>NEUTRIA FOR BUSINESS</div>
+          <h1 style={{fontSize:54,fontWeight:300,letterSpacing:'-0.035em',color:'#fff',fontFamily:"'Instrument Serif',serif",marginBottom:20,lineHeight:1.05}}>The resale infrastructure<br/>your customers expect.</h1>
+          <p style={{fontSize:17,color:T.g200,maxWidth:680,lineHeight:1.65}}>Embed Neutria's AI scanner and warehouse network into your store, app, or marketplace. Your brand. Our pipes.</p>
+        </div>
+      </section>
+
+      <section style={{padding:'80px 48px',background:T.surf,borderBottom:`1px solid ${T.bdr}`}}>
+        <div style={{maxWidth:1200,margin:'0 auto'}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g600,marginBottom:14,textTransform:'uppercase'}}>INTEGRATION OPTIONS</div>
+          <h2 style={{fontSize:36,fontWeight:300,color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:44,letterSpacing:'-0.02em'}}>Three ways to plug in.</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:18}}>
+            {[
+              {tag:'EMBED',t:'Branded scanner widget',d:'Drop our AI scanner into your customer app or website. White-labeled, fully styled to your brand.',f:['Same-day integration','iOS, Android, web SDK','Brand-styled UI']},
+              {tag:'API',t:'Full developer API',d:'Programmatic access to scanning, listing, warehouse intake, and inventory tracking. Build custom workflows.',f:['REST + GraphQL','Webhook events','Sandbox environment']},
+              {tag:'PARTNER',t:'Full-service partnership',d:'We build the consumer-facing flow for you. Your logo, your terms, our infrastructure end-to-end.',f:['Dedicated account team','Custom commission structure','SLA & enterprise support']},
+            ].map(o=>(
+              <div key={o.tag} style={{background:T.bg,border:`1px solid ${T.bdr}`,borderRadius:14,padding:'28px 24px'}}>
+                <div style={{fontSize:10,fontWeight:700,color:T.g600,letterSpacing:'0.12em',fontFamily:"'JetBrains Mono',monospace",marginBottom:14}}>{o.tag}</div>
+                <h3 style={{fontSize:19,fontWeight:500,color:T.ink,marginBottom:10,letterSpacing:'-0.01em'}}>{o.t}</h3>
+                <p style={{fontSize:13,color:T.ink3,lineHeight:1.65,marginBottom:18}}>{o.d}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                  {o.f.map(ft=><div key={ft} style={{fontSize:12,color:T.ink2,display:'flex',gap:8}}><span style={{color:T.g600,fontWeight:700}}>✓</span>{ft}</div>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{padding:'80px 48px',background:T.bg}}>
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g600,marginBottom:14,textTransform:'uppercase'}}>BUILT FOR</div>
+          <h2 style={{fontSize:36,fontWeight:300,color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:36,letterSpacing:'-0.02em'}}>Who Neutria powers.</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14}}>
+            {[
+              {t:'Retailers',d:'Offer customer take-back without building a logistics arm. M&S, John Lewis, Selfridges-scale brands needing a credible resale story.'},
+              {t:'Marketplaces',d:"Add a send-us-your-stuff service to your existing peer-to-peer platform. Capture casual sellers who won't list themselves."},
+              {t:'Logistics & couriers',d:'Convert your warehouse capacity into a consumer-facing service. Branded as you, powered by Neutria.'},
+              {t:'Charities & councils',d:'White-label our scanner for donation intake. Better triage, more revenue per item, less landfill.'},
+            ].map(w=>(
+              <div key={w.t} style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,padding:'22px 26px'}}>
+                <h3 style={{fontSize:17,fontWeight:500,color:T.ink,marginBottom:8,letterSpacing:'-0.01em'}}>{w.t}</h3>
+                <p style={{fontSize:13,color:T.ink3,lineHeight:1.65}}>{w.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{padding:'80px 48px',background:T.surf,borderTop:`1px solid ${T.bdr}`}}>
+        <div style={{maxWidth:680,margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:36}}>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g600,marginBottom:14,textTransform:'uppercase'}}>GET IN TOUCH</div>
+            <h2 style={{fontSize:36,fontWeight:300,color:T.ink,fontFamily:"'Instrument Serif',serif",letterSpacing:'-0.02em',marginBottom:14}}>Talk to our partnerships team.</h2>
+            <p style={{fontSize:14,color:T.ink3,lineHeight:1.65}}>Tell us about your company and what you want to build.</p>
+          </div>
+          {sent ? (
+            <div style={{background:T.g50,border:`1px solid ${T.g200}`,borderRadius:14,padding:'32px',textAlign:'center'}}>
+              <div style={{fontSize:36,marginBottom:14}}>✓</div>
+              <h3 style={{fontSize:20,fontWeight:500,color:T.ink,marginBottom:8}}>Thanks for reaching out</h3>
+              <p style={{fontSize:14,color:T.ink3}}>We've received your message and will respond within 48 hours.</p>
+            </div>
+          ) : (
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <input value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} placeholder="Your name *" style={{padding:'13px 16px',background:T.bg,border:`1px solid ${T.bdr}`,borderRadius:9,fontSize:14,color:T.ink,fontFamily:'Inter,sans-serif'}}/>
+                <input value={form.company} onChange={e=>setForm(p=>({...p,company:e.target.value}))} placeholder="Company *" style={{padding:'13px 16px',background:T.bg,border:`1px solid ${T.bdr}`,borderRadius:9,fontSize:14,color:T.ink,fontFamily:'Inter,sans-serif'}}/>
+              </div>
+              <input value={form.email} onChange={e=>setForm(p=>({...p,email:e.target.value}))} type="email" placeholder="Work email *" style={{padding:'13px 16px',background:T.bg,border:`1px solid ${T.bdr}`,borderRadius:9,fontSize:14,color:T.ink,fontFamily:'Inter,sans-serif'}}/>
+              <textarea value={form.message} onChange={e=>setForm(p=>({...p,message:e.target.value}))} placeholder="What are you hoping to build?" rows={5} style={{padding:'13px 16px',background:T.bg,border:`1px solid ${T.bdr}`,borderRadius:9,fontSize:14,color:T.ink,fontFamily:'Inter,sans-serif',resize:'vertical'}}/>
+              <button onClick={submit} style={{padding:'14px',background:T.g800,color:'#fff',borderRadius:10,fontSize:14,fontWeight:600,border:'none',cursor:'pointer'}}>Send message</button>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
@@ -224,18 +412,9 @@ function ScannerPage({ inv, setInv, plan, msg }) {
       const reader = new FileReader();
       const b64 = await new Promise(r => { reader.onload=()=>r(reader.result.split(',')[1]); reader.readAsDataURL(files[i]); });
       try {
-        const r = await fetch('/api/scan', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({imageBase64:b64})
-        });
+        const r = await fetch('/api/scan', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({imageBase64:b64}) });
         const data = await r.json();
-        res.push({
-          id: Math.random().toString(36).slice(2),
-          fileUrl: URL.createObjectURL(files[i]),
-          disposition: 'sell',
-          ...data
-        });
+        res.push({ id: Math.random().toString(36).slice(2), fileUrl: URL.createObjectURL(files[i]), disposition: 'sell', ...data });
       } catch(e) {
         res.push({id:Math.random().toString(36).slice(2),fileUrl:URL.createObjectURL(files[i]),title:'Unknown Item',suggested_price:20,condition:'Good',category:'Other',disposition:'sell'});
       }
@@ -266,12 +445,12 @@ function ScannerPage({ inv, setInv, plan, msg }) {
         </div>
         <h1 style={{fontSize:28,fontWeight:400,color:T.ink,letterSpacing:'-0.02em',fontFamily:"'Instrument Serif',serif",marginBottom:4}}>Smart Scanner</h1>
         <div style={{fontSize:10,fontWeight:700,color:T.g500,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:20}}>AI Visual Intelligence</div>
-        <p style={{fontSize:13,color:T.ink3,lineHeight:1.75,marginBottom:32}}>Upload photos of any item. Claude Vision AI identifies it, prices it, and creates a professional listing automatically.</p>
+        <p style={{fontSize:13,color:T.ink3,lineHeight:1.75,marginBottom:32}}>Upload photos of any item. Our AI identifies it, prices it, and creates a professional listing automatically.</p>
         <div style={{background:T.g50,border:`1px solid ${T.g100}`,borderRadius:10,padding:'14px 16px',marginBottom:24}}>
           <div style={{fontSize:11,fontWeight:700,color:T.g600,marginBottom:4}}>{plan.name} plan</div>
           <div style={{fontSize:12,color:T.ink3}}>{plan.scans===Infinity?'Unlimited':'Up to '+plan.scans} scans · {plan.commission}% commission</div>
         </div>
-        {[['Visual recognition','Brand, model, condition'],['AI pricing','Market-based pricing'],['Auto description','Title, copy, tags'],['Shopify push','Direct to your store']].map(([t,s])=>(
+        {[['Visual recognition','Brand, model, condition'],['AI pricing','Market-based pricing'],['Auto description','Title, copy, tags'],['Warehouse routing','Direct to Neutria fulfilment']].map(([t,s])=>(
           <div key={t} style={{display:'flex',gap:12,marginBottom:16}}>
             <div style={{width:6,height:6,borderRadius:'50%',background:T.g500,marginTop:5,flexShrink:0}}/>
             <div><div style={{fontSize:13,fontWeight:600,color:T.ink,marginBottom:1}}>{t}</div><div style={{fontSize:12,color:T.ink4}}>{s}</div></div>
@@ -364,14 +543,14 @@ function ScannerPage({ inv, setInv, plan, msg }) {
 // ── MARKETPLACE ────────────────────────────────────────────────────────────
 function MarketplacePage({ addCart, onItem }) {
   const DEMO = [
-    {id:'d1',title:"Vintage Levi's 501 Jeans",category:'Clothing',condition:'Good',price:54,retail:95,img:'👖',seller:'maya_k',tags:['vintage','denim'],views:142,demand:'High',luxury:false},
-    {id:'d2',title:'Sony WH-1000XM4 Headphones',category:'Electronics',condition:'Excellent',price:145,retail:275,img:'🎧',seller:'techflip',tags:['sony','audio'],views:389,demand:'High',luxury:false},
-    {id:'d3',title:'KitchenAid Stand Mixer',category:'Home & Kitchen',condition:'Good',price:172,retail:335,img:'🍰',seller:'homegoodz',tags:['kitchenaid'],views:211,demand:'Medium',luxury:false},
-    {id:'d4',title:"Arc'teryx Beta AR Jacket",category:'Clothing',condition:'Very Good',price:265,retail:585,img:'🧥',seller:'outdoorflow',tags:['arcteryx'],views:298,demand:'High',luxury:true},
-    {id:'d5',title:'Herman Miller Aeron Chair',category:'Furniture',condition:'Good',price:530,retail:1165,img:'🪑',seller:'officeflip',tags:['hermanmiller'],views:432,demand:'High',luxury:true},
-    {id:'d6',title:'Nintendo Switch OLED',category:'Electronics',condition:'Very Good',price:215,retail:275,img:'🎮',seller:'gamestash',tags:['nintendo'],views:619,demand:'High',luxury:false},
-    {id:'d7',title:'Apple AirPods Pro 2nd Gen',category:'Electronics',condition:'Excellent',price:137,retail:195,img:'🎵',seller:'techflip',tags:['apple'],views:841,demand:'High',luxury:false},
-    {id:'d8',title:'Rolex Submariner Watch',category:'Jewellery & Watches',condition:'Good',price:4850,retail:7400,img:'⌚',seller:'luxeflip',tags:['rolex'],views:1203,demand:'High',luxury:true},
+    {id:'d1',title:"Vintage Levi's 501 Jeans",category:'Clothing',condition:'Good',price:54,retail:95,img:'👖',views:142,demand:'High',luxury:false},
+    {id:'d2',title:'Sony WH-1000XM4 Headphones',category:'Electronics',condition:'Excellent',price:145,retail:275,img:'🎧',views:389,demand:'High',luxury:false},
+    {id:'d3',title:'KitchenAid Stand Mixer',category:'Home & Kitchen',condition:'Good',price:172,retail:335,img:'🍰',views:211,demand:'Medium',luxury:false},
+    {id:'d4',title:"Arc'teryx Beta AR Jacket",category:'Clothing',condition:'Very Good',price:265,retail:585,img:'🧥',views:298,demand:'High',luxury:true},
+    {id:'d5',title:'Herman Miller Aeron Chair',category:'Furniture',condition:'Good',price:530,retail:1165,img:'🪑',views:432,demand:'High',luxury:true},
+    {id:'d6',title:'Nintendo Switch OLED',category:'Electronics',condition:'Very Good',price:215,retail:275,img:'🎮',views:619,demand:'High',luxury:false},
+    {id:'d7',title:'Apple AirPods Pro 2nd Gen',category:'Electronics',condition:'Excellent',price:137,retail:195,img:'🎵',views:841,demand:'High',luxury:false},
+    {id:'d8',title:'Rolex Submariner Watch',category:'Jewellery & Watches',condition:'Good',price:4850,retail:7400,img:'⌚',views:1203,demand:'High',luxury:true},
   ];
   const [q,setQ]=useState('');
   const filtered=DEMO.filter(i=>!q||i.title.toLowerCase().includes(q.toLowerCase()));
@@ -386,7 +565,7 @@ function MarketplacePage({ addCart, onItem }) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))',gap:16}}>
         {filtered.map(item=>(
-          <div key={item.id} onClick={()=>onItem(item)} style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,overflow:'hidden',cursor:'pointer',transition:'box-shadow .2s,transform .2s'}}>
+          <div key={item.id} onClick={()=>onItem(item)} style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,overflow:'hidden',cursor:'pointer'}}>
             <div style={{height:200,display:'flex',alignItems:'center',justifyContent:'center',background:T.alt,position:'relative'}}>
               <span style={{fontSize:52}}>{item.img}</span>
               {pct(item.price,item.retail)>0&&<div style={{position:'absolute',top:10,right:10,background:T.g800,color:'#fff',fontSize:10,fontWeight:600,padding:'3px 8px',borderRadius:5}}>−{pct(item.price,item.retail)}%</div>}
@@ -430,14 +609,14 @@ function ItemPage({ item, onBack, addCart, buyNow }) {
           {item.description&&<p style={{fontSize:14,color:T.ink3,lineHeight:1.8,marginBottom:20}}>{item.description}</p>}
           <button onClick={()=>buyNow(item)} style={{width:'100%',padding:'14px',background:T.g800,color:'#fff',borderRadius:10,fontSize:15,fontWeight:500,border:'none',cursor:'pointer',marginBottom:10}}>Buy now · {fmt(item.price)}</button>
           <button onClick={()=>addCart(item)} style={{width:'100%',padding:'12px',background:T.g50,color:T.g700,borderRadius:10,fontSize:14,fontWeight:500,border:`1px solid ${T.g200}`,cursor:'pointer',marginBottom:12}}>Add to cart</button>
-          <p style={{textAlign:'center',color:T.ink5,fontSize:12}}>Free UK delivery · Buyer protection · Secure checkout</p>
+          <p style={{textAlign:'center',color:T.ink5,fontSize:12}}>Free UK delivery · Buyer protection · Tracked shipping</p>
         </div>
       </div>
     </div>
   );
 }
 
-// ── MEMBERSHIP PAGE ────────────────────────────────────────────────────────
+// ── MEMBERSHIP ─────────────────────────────────────────────────────────────
 function MembershipPage({ plan, onSelect }) {
   const [billing, setBilling] = useState('monthly');
   return (
@@ -448,7 +627,7 @@ function MembershipPage({ plan, onSelect }) {
         <p style={{fontSize:16,color:T.ink3,maxWidth:440,margin:'0 auto 36px'}}>From casual decluttering to full-scale resale. Every tier includes AI scanning.</p>
         <div style={{display:'inline-flex',background:T.alt,borderRadius:10,padding:4,gap:2}}>
           {['monthly','annual'].map(b=>(
-            <button key={b} onClick={()=>setBilling(b)} style={{padding:'8px 20px',borderRadius:7,border:'none',cursor:'pointer',fontSize:13,fontWeight:500,background:billing===b?T.surf:'transparent',color:billing===b?T.ink:T.ink4,boxShadow:billing===b?'0 1px 4px rgba(0,0,0,.08)':'none',transition:'all .2s'}}>
+            <button key={b} onClick={()=>setBilling(b)} style={{padding:'8px 20px',borderRadius:7,border:'none',cursor:'pointer',fontSize:13,fontWeight:500,background:billing===b?T.surf:'transparent',color:billing===b?T.ink:T.ink4,boxShadow:billing===b?'0 1px 4px rgba(0,0,0,.08)':'none'}}>
               {b==='monthly'?'Monthly':'Annual'}
               {b==='annual'&&<span style={{marginLeft:8,fontSize:10,fontWeight:700,color:T.g600,background:T.g50,padding:'2px 6px',borderRadius:4}}>−20%</span>}
             </button>
@@ -464,9 +643,7 @@ function MembershipPage({ plan, onSelect }) {
               <div style={{padding:'28px 24px',borderBottom:`1px solid ${T.bdrS}`}}>
                 <div style={{fontSize:12,fontWeight:700,color:T.g600,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:8}}>{p.name}</div>
                 <div style={{display:'flex',alignItems:'baseline',gap:4,marginBottom:8}}>
-                  <span style={{fontSize:40,fontWeight:300,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>
-                    {p.price===0?'Free':`£${billing==='annual'?Math.round(p.price*.8):p.price}`}
-                  </span>
+                  <span style={{fontSize:40,fontWeight:300,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>{p.price===0?'Free':`£${billing==='annual'?Math.round(p.price*.8):p.price}`}</span>
                   {p.price>0&&<span style={{fontSize:13,color:T.ink4}}>/mo</span>}
                 </div>
                 <p style={{fontSize:13,color:T.ink4,lineHeight:1.5}}>{p.period}</p>
@@ -480,32 +657,10 @@ function MembershipPage({ plan, onSelect }) {
                     </div>
                   ))}
                 </div>
-                <button onClick={()=>onSelect(p)} style={{width:'100%',padding:'11px',background:plan.id===p.id?T.alt:p.highlight?T.g800:T.g900,color:plan.id===p.id?T.ink3:'#fff',border:`1px solid ${plan.id===p.id?T.bdr:p.highlight?T.g800:T.g900}`,borderRadius:9,fontSize:13,fontWeight:600,cursor:'pointer'}}>
-                  {plan.id===p.id?'Current plan':p.cta}
-                </button>
+                <button onClick={()=>onSelect(p)} style={{width:'100%',padding:'11px',background:plan.id===p.id?T.alt:p.highlight?T.g800:T.g900,color:plan.id===p.id?T.ink3:'#fff',border:`1px solid ${plan.id===p.id?T.bdr:p.highlight?T.g800:T.g900}`,borderRadius:9,fontSize:13,fontWeight:600,cursor:'pointer'}}>{plan.id===p.id?'Current plan':p.cta}</button>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Commission comparison */}
-        <div style={{marginTop:48,background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:16,overflow:'hidden'}}>
-          <div style={{padding:'24px 28px',borderBottom:`1px solid ${T.bdrS}`}}>
-            <h3 style={{fontSize:18,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>What you keep per sale</h3>
-            <p style={{fontSize:13,color:T.ink4,marginTop:4}}>On a £200 sale:</p>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
-            {PLANS.map((p,i)=>{
-              const kept=Math.round(200*(1-p.commission/100));
-              return(
-                <div key={p.id} style={{padding:'24px 28px',borderRight:i<3?`1px solid ${T.bdrS}`:'none',background:plan.id===p.id?T.g50:'transparent'}}>
-                  <div style={{fontSize:11,fontWeight:700,color:plan.id===p.id?T.g600:T.ink5,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>{p.name}</div>
-                  <div style={{fontSize:32,fontWeight:400,color:plan.id===p.id?T.g700:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:4}}>£{kept}</div>
-                  <div style={{fontSize:13,color:T.ink4}}>You keep {100-p.commission}%</div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
     </div>
@@ -516,16 +671,16 @@ function MembershipPage({ plan, onSelect }) {
 function DashboardPage({ inv, orders, plan, go }) {
   const totalVal = inv.reduce((s,i)=>s+(i.price||0),0);
   return (
-    <div style={{maxWidth:1000,margin:'0 auto',padding:'40px 48px'}}>
+    <div style={{maxWidth:1100,margin:'0 auto',padding:'40px 48px'}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:32}}>
         <div>
-          <h1 style={{fontSize:30,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>Dashboard</h1>
-          <p style={{fontSize:13,color:T.ink4,marginTop:4}}>Your resale business at a glance</p>
+          <h1 style={{fontSize:30,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>Your inventory</h1>
+          <p style={{fontSize:13,color:T.ink4,marginTop:4}}>Track everything you've sent in</p>
         </div>
-        <button onClick={()=>go('scanner')} style={{padding:'9px 20px',background:T.g800,color:'#fff',borderRadius:8,fontSize:13,fontWeight:500,border:'none',cursor:'pointer'}}>+ Scan items</button>
+        <button onClick={()=>go('scanner')} style={{padding:'9px 20px',background:T.g800,color:'#fff',borderRadius:8,fontSize:13,fontWeight:500,border:'none',cursor:'pointer'}}>+ Add items</button>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
-        {[['Listings',inv.length,'items'],['Portfolio',`£${Math.round(totalVal).toLocaleString()}`,''],['Orders',orders.length,'total'],['Plan',plan.name,'']].map(([l,v,u])=>(
+        {[['Items in warehouse',inv.length,''],['Total value',`£${Math.round(totalVal).toLocaleString()}`,''],['Sold this month',orders.length,''],['Plan',plan.name,'']].map(([l,v,u])=>(
           <div key={l} style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,padding:'22px 20px'}}>
             <div style={{fontSize:11,fontWeight:500,color:T.ink4,marginBottom:10}}>{l}</div>
             <div style={{fontSize:28,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>{v}<span style={{fontSize:14,color:T.ink4,marginLeft:6}}>{u}</span></div>
@@ -557,7 +712,7 @@ function DashboardPage({ inv, orders, plan, go }) {
   );
 }
 
-// ── CART PAGE ──────────────────────────────────────────────────────────────
+// ── CART ───────────────────────────────────────────────────────────────────
 function CartPage({ cart, setCart, go, onCheckout }) {
   const total = cart.reduce((s,i)=>s+(i.price||0),0);
   return (
@@ -603,8 +758,8 @@ function CartPage({ cart, setCart, go, onCheckout }) {
   );
 }
 
-// ── CHECKOUT PAGE ──────────────────────────────────────────────────────────
-function CheckoutPage({ items, onBack, onPlace, go }) {
+// ── CHECKOUT ───────────────────────────────────────────────────────────────
+function CheckoutPage({ items, onBack, onPlace }) {
   const [step, setStep] = useState(1);
   const [addr, setAddr] = useState({name:'',line1:'',city:'',postcode:'',phone:''});
   const [card, setCard] = useState({number:'',expiry:'',cvc:'',name:''});
@@ -664,12 +819,6 @@ function CheckoutPage({ items, onBack, onPlace, go }) {
             {step===2&&(
               <div style={{display:'flex',flexDirection:'column',gap:14}}>
                 <h2 style={{fontSize:22,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:4}}>Payment</h2>
-                <div style={{background:`linear-gradient(135deg,${T.g900},${T.g700})`,borderRadius:14,padding:'22px 24px',color:'#fff',position:'relative',overflow:'hidden',aspectRatio:'1.6/1',maxHeight:180}}>
-                  <div style={{position:'absolute',top:-20,right:-20,width:140,height:140,borderRadius:'50%',background:'rgba(255,255,255,.04)'}}/>
-                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:24}}><Logo size={26} color="rgba(255,255,255,.7)"/><span style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,.5)',letterSpacing:'0.1em'}}>CARD</span></div>
-                  <div style={{fontSize:15,letterSpacing:'0.18em',fontFamily:"'JetBrains Mono',monospace",marginBottom:16,color:'rgba(255,255,255,.9)'}}>{(card.number||'•••• •••• •••• ••••')}</div>
-                  <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'rgba(255,255,255,.6)'}}><span>{card.name||'CARDHOLDER NAME'}</span><span>{card.expiry||'MM/YY'}</span></div>
-                </div>
                 <div><div style={{fontSize:10,fontWeight:700,color:T.ink5,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:5}}>Name on card</div><input style={inp} value={card.name} onChange={e=>setC('name',e.target.value.toUpperCase())} placeholder="JANE SMITH"/></div>
                 <div><div style={{fontSize:10,fontWeight:700,color:T.ink5,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:5}}>Card number</div><input style={inp} value={card.number} onChange={e=>setC('number',e.target.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().slice(0,19))} placeholder="1234 5678 9012 3456" maxLength={19}/></div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
@@ -685,20 +834,11 @@ function CheckoutPage({ items, onBack, onPlace, go }) {
             {step===3&&(
               <div style={{display:'flex',flexDirection:'column',gap:16}}>
                 <h2 style={{fontSize:22,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:4}}>Review your order</h2>
-                <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,overflow:'hidden'}}>
-                  {[['Delivering to',`${addr.name} · ${addr.line1}, ${addr.city} ${addr.postcode}`,()=>setStep(1)],['Payment',`•••• •••• •••• ${card.number.replace(/\s/g,'').slice(-4)}`,()=>setStep(2)]].map(([k,v,edit],i)=>(
-                    <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',borderBottom:i===0?`1px solid ${T.bdrS}`:'none'}}>
-                      <div><div style={{fontSize:10,fontWeight:700,color:T.ink5,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:3}}>{k}</div><div style={{fontSize:13,color:T.ink2}}>{v}</div></div>
-                      <button onClick={edit} style={{fontSize:12,color:T.g600,fontWeight:600,cursor:'pointer',background:'none',border:'none'}}>Edit</button>
-                    </div>
-                  ))}
+                <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,padding:'14px 20px'}}>
+                  <div style={{fontSize:13,color:T.ink2,marginBottom:4}}>{addr.name} · {addr.line1}, {addr.city} {addr.postcode}</div>
+                  <div style={{fontSize:13,color:T.ink2}}>•••• •••• •••• {card.number.replace(/\s/g,'').slice(-4)}</div>
                 </div>
-                <div style={{display:'flex',gap:10}}>
-                  <button onClick={()=>setStep(2)} style={{flex:1,padding:'12px',background:T.alt,border:`1px solid ${T.bdr}`,borderRadius:9,color:T.ink3,fontSize:13,fontWeight:500,cursor:'pointer'}}>← Back</button>
-                  <button onClick={handlePlace} disabled={placing} style={{flex:2,padding:'13px',background:T.g800,color:'#fff',borderRadius:9,fontSize:14,fontWeight:600,border:'none',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
-                    {placing?<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:'spin 1s linear infinite'}}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>Processing…</>:<>Pay {fmt(total)} · Neutria Pay</>}
-                  </button>
-                </div>
+                <button onClick={handlePlace} disabled={placing} style={{padding:'13px',background:T.g800,color:'#fff',borderRadius:9,fontSize:14,fontWeight:600,border:'none',cursor:'pointer'}}>{placing?'Processing…':`Pay ${fmt(total)} · Neutria Pay`}</button>
               </div>
             )}
           </div>
@@ -715,7 +855,6 @@ function CheckoutPage({ items, onBack, onPlace, go }) {
                 </div>
               ))}
               <div style={{borderTop:`1px solid ${T.bdrS}`,paddingTop:12,marginTop:4}}>
-                <div style={{display:'flex',justifyContent:'space-between',fontSize:13,color:T.ink4,marginBottom:6}}><span>Delivery</span><span style={{color:T.g600,fontWeight:600}}>Free</span></div>
                 <div style={{display:'flex',justifyContent:'space-between',fontSize:15,fontWeight:600,color:T.ink}}><span>Total</span><span style={{fontFamily:"'JetBrains Mono',monospace",color:T.g700}}>{fmt(total)}</span></div>
               </div>
             </div>
@@ -726,7 +865,7 @@ function CheckoutPage({ items, onBack, onPlace, go }) {
   );
 }
 
-// ── ORDERS PAGE ────────────────────────────────────────────────────────────
+// ── ORDERS ─────────────────────────────────────────────────────────────────
 function OrdersPage({ orders, go, onOrder }) {
   return (
     <div style={{maxWidth:760,margin:'0 auto',padding:'48px'}}>
@@ -751,7 +890,6 @@ function OrdersPage({ orders, go, onOrder }) {
               </div>
               <div style={{textAlign:'right'}}>
                 <div style={{fontSize:18,fontWeight:600,color:T.g700,fontFamily:"'JetBrains Mono',monospace"}}>{fmt(order.item?.price)}</div>
-                <div style={{fontSize:11,color:T.ink5,marginTop:4}}>View details →</div>
               </div>
             </div>
           ))}
@@ -764,24 +902,12 @@ function OrdersPage({ orders, go, onOrder }) {
 // ── ORDER DETAIL ───────────────────────────────────────────────────────────
 function OrderDetailPage({ order, onBack }) {
   if (!order) return null;
-  const events = [
-    {label:'Order confirmed',done:true,time:order.placedAt},
-    {label:'Seller notified',done:true,time:order.placedAt},
-    {label:'Picked up by carrier',done:false,time:'Pending'},
-    {label:'Out for delivery',done:false,time:'Pending'},
-    {label:'Delivered',done:false,time:'Pending'},
-  ];
   return (
     <div style={{maxWidth:760,margin:'0 auto',padding:'48px'}}>
       <button onClick={onBack} style={{color:T.ink4,fontSize:13,cursor:'pointer',background:'none',border:'none',marginBottom:28,display:'block'}}>← Orders</button>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:32}}>
-        <div>
-          <h1 style={{fontSize:28,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:4}}>Order {order.id}</h1>
-          <p style={{fontSize:13,color:T.ink4}}>Placed {order.placedAt}</p>
-        </div>
-        <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:20,background:T.g50,color:T.g700,border:`1px solid ${T.g200}`}}>✓ Confirmed</span>
-      </div>
-      <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:14,padding:'20px 24px',marginBottom:16,display:'flex',gap:16,alignItems:'center'}}>
+      <h1 style={{fontSize:28,fontWeight:400,color:T.ink,fontFamily:"'Instrument Serif',serif",marginBottom:4}}>Order {order.id}</h1>
+      <p style={{fontSize:13,color:T.ink4,marginBottom:24}}>Placed {order.placedAt}</p>
+      <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:14,padding:'20px 24px',display:'flex',gap:16,alignItems:'center'}}>
         <div style={{width:64,height:64,borderRadius:10,background:T.alt,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,overflow:'hidden'}}>
           {order.item?.fileUrl?<img src={order.item.fileUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>:<span style={{fontSize:28}}>{order.item?.img}</span>}
         </div>
@@ -790,35 +916,6 @@ function OrderDetailPage({ order, onBack }) {
           <div style={{fontSize:12,color:T.ink4,marginTop:2}}>{order.item?.condition}</div>
         </div>
         <div style={{fontSize:22,fontWeight:600,color:T.g700,fontFamily:"'JetBrains Mono',monospace"}}>{fmt(order.item?.price)}</div>
-      </div>
-      <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:14,padding:'24px',marginBottom:16}}>
-        <div style={{fontSize:13,fontWeight:600,color:T.ink,marginBottom:20}}>Delivery tracking</div>
-        <div style={{height:4,background:T.alt,borderRadius:2,overflow:'hidden',marginBottom:24}}>
-          <div style={{height:'100%',background:`linear-gradient(90deg,${T.g500},${T.g400})`,borderRadius:2,width:'40%'}}/>
-        </div>
-        {events.map((ev,i)=>(
-          <div key={i} style={{display:'flex',gap:14,alignItems:'flex-start',paddingBottom:i<events.length-1?18:0,position:'relative'}}>
-            {i<events.length-1&&<div style={{position:'absolute',left:11,top:24,width:2,height:'calc(100% - 8px)',background:ev.done?T.g200:T.alt}}/>}
-            <div style={{width:24,height:24,borderRadius:'50%',background:ev.done?T.g600:T.alt,border:`2px solid ${ev.done?T.g600:T.bdr}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,zIndex:1}}>
-              {ev.done&&<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
-            </div>
-            <div style={{paddingTop:2}}>
-              <div style={{fontSize:13,fontWeight:ev.done?600:400,color:ev.done?T.ink:T.ink4}}>{ev.label}</div>
-              <div style={{fontSize:11,color:T.ink5,marginTop:1}}>{ev.time}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
-        <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,padding:'18px 20px'}}>
-          <div style={{fontSize:11,fontWeight:700,color:T.ink5,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:10}}>Delivering to</div>
-          <div style={{fontSize:13,color:T.ink,lineHeight:1.8}}>{order.address?.name}<br/>{order.address?.line1}<br/>{order.address?.city} {order.address?.postcode}</div>
-        </div>
-        <div style={{background:T.surf,border:`1px solid ${T.bdr}`,borderRadius:12,padding:'18px 20px'}}>
-          <div style={{fontSize:11,fontWeight:700,color:T.ink5,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:10}}>Payment</div>
-          <div style={{fontSize:13,color:T.ink,marginBottom:8}}>•••• •••• •••• {order.card}</div>
-          <div style={{display:'flex',justifyContent:'space-between',fontSize:13}}><span style={{color:T.ink3}}>Total paid</span><span style={{fontWeight:600,color:T.g700,fontFamily:"'JetBrains Mono',monospace"}}>{fmt(order.item?.price)}</span></div>
-        </div>
       </div>
     </div>
   );
