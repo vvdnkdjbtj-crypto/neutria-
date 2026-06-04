@@ -1,4 +1,9 @@
 // pages/api/scan.js
+//
+// Vercel proxy → HuggingFace Space JSON endpoint.
+// Forwards the base64 image to https://cate-333-neutria-smart-scanner.hf.space/api/scan
+// which runs BLIP + ResNet + Tesseract + Claude Vision and returns proper structured data.
+
 export const config = {
   api: {
     bodyParser: {
@@ -7,30 +12,7 @@ export const config = {
   },
 };
 
-const HF_SPACE_URL = 'https://cate-333-neutria-smart-scanner.hf.space/scan';
-
-function estimatePrice(categoryLabel, ocrText) {
-  const ocr = (ocrText || '').toLowerCase();
-  const luxury = ['chanel', 'gucci', 'prada', 'dior', 'louis vuitton', 'hermes', 'burberry'];
-  if (luxury.some(b => ocr.includes(b))) return 250;
-
-  const cat = (categoryLabel || '').toLowerCase();
-  if (/chair|table|desk|sofa|couch|cabinet|shelf/.test(cat)) return 85;
-  if (/camera|laptop|phone|computer|tablet|monitor/.test(cat)) return 120;
-  if (/jersey|sweater|coat|dress|jacket|shirt|hoodie/.test(cat)) return 35;
-  if (/book|magazine|notebook/.test(cat)) return 8;
-  if (/bottle|jar|cup|mug|glass/.test(cat)) return 12;
-  return 35;
-}
-
-function tidyTitle(caption, category) {
-  if (!caption) return category ? category.split(',')[0].replace(/\b\w/g, c => c.toUpperCase()) : 'Secondhand Item';
-  let t = caption.trim();
-  t = t.replace(/^a /i, '').replace(/^an /i, '').replace(/ sitting on a table$/i, '').replace(/ on a table$/i, '');
-  t = t.charAt(0).toUpperCase() + t.slice(1);
-  if (t.length > 70) t = t.slice(0, 67) + '...';
-  return t;
-}
+const HF_API_URL = 'https://cate-333-neutria-smart-scanner.hf.space/api/scan';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -44,27 +26,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing imageBase64 in request body' });
     }
 
+    // Strip any data:image prefix
     const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-    const imageBuffer = Buffer.from(cleanBase64, 'base64');
-    const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
 
-    const formData = new FormData();
-    formData.append('photo', blob, 'scan.jpg');
-    if (createShopify) {
-      formData.append('create_shopify', '1');
-    }
-
-    const hfResponse = await fetch(HF_SPACE_URL, {
+    // Forward to HuggingFace as JSON
+    const hfResponse = await fetch(HF_API_URL, {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageBase64: cleanBase64,
+        create_shopify: !!createShopify,
+      }),
     });
 
-    const text = await hfResponse.text();
-
-    const match = text.match(/<pre>([\s\S]*?)<\/pre>/);
-    if (!match || !match[1]) {
+    if (!hfResponse.ok) {
+      const errText = await hfResponse.text();
       return res.status(hfResponse.status).json({
-        error: 'No JSON in HF response',
+        error: 'HF scanner returned an error',
+        details: errText.slice(0, 500),
         title: 'Unknown Item',
         price: 0,
         suggested_price: 0,
@@ -73,48 +52,20 @@ export default async function handler(req, res) {
       });
     }
 
-    let hf;
-    try {
-      hf = JSON.parse(
-        match[1]
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-      );
-    } catch (parseErr) {
-      return res.status(200).json({
-        error: 'JSON parse failed',
-        title: 'Unknown Item',
-        price: 0,
-        suggested_price: 0,
-        category: 'Misc',
-        condition: 'Good',
-      });
-    }
+    const hf = await hfResponse.json();
 
-    const caption = hf?.recognized?.blip_caption || '';
-    const topLabel = hf?.recognized?.top_label || '';
-    const ocrLines = hf?.recognized?.ocr_text || [];
-    const ocrJoined = Array.isArray(ocrLines) ? ocrLines.join(' ') : '';
-    const hfPrice = hf?.pricing?.resale_price;
-
-    const title = tidyTitle(caption, topLabel);
-    const category = topLabel ? topLabel.split(',')[0].replace(/\b\w/g, c => c.toUpperCase()) : 'Misc';
-    const price = (typeof hfPrice === 'number' && hfPrice > 0) ? hfPrice : estimatePrice(topLabel, ocrJoined);
-    const condition = 'Good';
-    const description = caption || `Secondhand ${category.toLowerCase()}.`;
-    const brandText = ocrJoined.trim();
-
+    // The HF /api/scan endpoint already returns the proper structured shape.
+    // Just pass it through, ensuring the fields the frontend needs are present.
     return res.status(200).json({
-      title,
-      price,
-      suggested_price: price,
-      category,
-      condition,
-      description,
-      brand_text: brandText,
-      shopify: hf?.shopify || null,
+      title: hf.title || 'Secondhand Item',
+      price: hf.price ?? hf.suggested_price ?? 0,
+      suggested_price: hf.suggested_price ?? hf.price ?? 0,
+      category: hf.category || 'Misc',
+      condition: hf.condition || 'Good',
+      description: hf.body_html || hf.blip_caption || '',
+      brand_text: Array.isArray(hf.ocr_text) ? hf.ocr_text.join(' ') : '',
+      shopify: hf.shopify || null,
+      vision: hf.vision || null,
       _raw: hf,
     });
   } catch (err) {
