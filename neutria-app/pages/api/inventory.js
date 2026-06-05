@@ -5,7 +5,7 @@
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN;
 const SHOPIFY_TOKEN = process.env.SHOPIFY_TOKEN;
-const API_VERSION = '2024-10';
+const API_VERSION = '2025-07';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
