@@ -17,8 +17,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://${SHOPIFY_DOMAIN}/admin/api/${API_VERSION}/products.json?limit=100`;
-
+    const cleanDomain = SHOPIFY_DOMAIN.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    const url = `https://${cleanDomain}/admin/api/${API_VERSION}/products.json?limit=100`;
     const shopRes = await fetch(url, {
       headers: {
         'X-Shopify-Access-Token': SHOPIFY_TOKEN,
