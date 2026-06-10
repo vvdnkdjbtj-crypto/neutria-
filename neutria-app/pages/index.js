@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { fmt, pct } from '../lib/format';
 import Head from 'next/head';
 
 const T = {
@@ -34,8 +35,6 @@ function Logo({ size=28, color="#fff" }) {
   );
 }
 
-function fmt(n) { return `£${Number(n||0).toLocaleString()}`; }
-function pct(a,b) { return b>0 ? Math.round(((b-a)/b)*100) : 0; }
 
 export default function Neutria() {
   const [page, setPage] = useState('home');

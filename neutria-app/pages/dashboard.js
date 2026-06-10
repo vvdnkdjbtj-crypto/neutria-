@@ -2,6 +2,7 @@
 // Live inventory dashboard — pulls real items from /api/inventory (Shopify).
 
 import { useState, useEffect } from 'react';
+import { money } from '../lib/format';
 
 export default function Dashboard() {
   const [items, setItems] = useState([]);
@@ -25,7 +26,6 @@ export default function Dashboard() {
       });
   }, []);
 
-  const money = (n) => `£${Number(n || 0).toFixed(2)}`;
   const totalValue = items.reduce((sum, i) => sum + Number(i.price || 0), 0);
   const live = items.filter((i) => i.status === 'active').length;
 
