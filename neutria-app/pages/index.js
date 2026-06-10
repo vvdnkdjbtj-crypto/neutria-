@@ -246,7 +246,7 @@ function HomePage({ go, msg }) {
               <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.14em',color:T.g300,marginBottom:14,textTransform:'uppercase'}}>FOR BRANDS & MARKETPLACES</div>
               <h2 style={{fontSize:42,fontWeight:300,letterSpacing:'-0.03em',color:'#fff',fontFamily:"'Instrument Serif',serif",marginBottom:20,lineHeight:1.1}}>Neutria, embedded in your store.</h2>
               <p style={{fontSize:15,color:T.g200,lineHeight:1.75,marginBottom:20}}>Every retailer is being asked to offer take-back and resale. Building it from scratch costs millions and takes years.</p>
-              <p style={{fontSize:15,color:T.g200,lineHeight:1.75,marginBottom:30}}>Neutria is the plug-in. Your customers scan items in your branded app. Items flow into our warehouse infrastructure. Resale revenue lands back in your loyalty program.</p>
+              <p style={{fontSize:15,color:T.g200,lineHeight:1.75,marginBottom:30}}>Neutria is the plug-in. Your customers scan items in your branded app. Items flow into your existing warehouse infrastructure. Resale revenue lands back in your loyalty program.</p>
               <button onClick={()=>go('partners')} style={{padding:'12px 22px',background:'#fff',color:T.g900,borderRadius:9,fontSize:14,fontWeight:600,border:'none',cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
                 See partner options
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
