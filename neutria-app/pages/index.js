@@ -158,7 +158,7 @@ function HomePage({ go, msg }) {
               <span style={{marginLeft:8,fontSize:11,fontWeight:600,color:T.ink4,fontFamily:"'JetBrains Mono',monospace"}}>my.neutria.co.uk · inventory</span>
             </div>
             <div style={{padding:'18px 18px 14px',background:T.surf,borderBottom:`1px solid ${T.bdrS}`}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.g600,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8}}>Your Inventory</div>
+              <div style={{fontSize:11,fontWeight:700,color:T.g600,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8}}>Sample dashboard</div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
                 {[['247','Items'],['£3,420','Sold'],['£8,160','Listed']].map(([v,l])=>(
                   <div key={l}><div style={{fontSize:20,fontWeight:500,color:T.ink,fontFamily:"'Instrument Serif',serif"}}>{v}</div><div style={{fontSize:10,color:T.ink4,fontWeight:500}}>{l}</div></div>
@@ -179,6 +179,7 @@ function HomePage({ go, msg }) {
                 </div>
               ))}
             </div>
+            <a href="/dashboard" style={{display:'block',textAlign:'center',padding:'12px 14px',borderTop:`1px solid ${T.bdrS}`,background:T.surf,fontSize:11,fontWeight:600,color:T.g700,textDecoration:'none',fontFamily:"'JetBrains Mono',monospace"}}>View your live dashboard →</a>
           </div>
         </div>
       </section>
@@ -193,7 +194,7 @@ function HomePage({ go, msg }) {
           <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16}}>
             {[
               {n:'01',t:'Scan your items',d:'Photograph anything with our AI scanner. Identifies brand, model, condition, and market value in seconds.'},
-              {n:'02',t:'Send them in',d:'Print a free prepaid label. Drop the box at any post office. Items arrive at our UK warehouse.'},
+              {n:'02',t:'Send them in',d:'Print a free prepaid label. Drop the box at any post office. Items are routed to our UK fulfilment partners.'},
               {n:'03',t:'We list everywhere',d:'Items get listed on Neutria, eBay, Vinted, Depop — automatically. We handle every buyer message and return.'},
               {n:'04',t:'Watch from your dashboard',d:"See what's listed, what's sold, what's viewed. Get paid monthly. Donate anything unsold."},
             ].map(s=>(
@@ -223,7 +224,7 @@ function HomePage({ go, msg }) {
               {[
                 ['Time to list 50 items','Vinted: ~8 hours','Neutria: ~15 minutes'],
                 ['Buyer messages handled','You','Us'],
-                ['Storage of unsold items','Your house','Our warehouse'],
+                ['Storage of unsold items','Your house','Partner warehouses'],
                 ['Categories accepted','One per app','All'],
                 ['Items left over','Your problem','Auto-donated'],
               ].map(([label,old,ours],i)=>(
